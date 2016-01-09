@@ -1,0 +1,47 @@
+{
+  "name": "chasm",
+  "version": "1.0.1",
+  "engines": {
+    "node": "*"
+  },
+  "description": "Module to asynchronously determine port availability.",
+  "main": "./api.js",
+  "scripts": {
+    "test": "node ./test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/metaceo/nodejs.chasm.git"
+  },
+  "keywords": [
+    "async",
+    "asynchronous",
+    "availabile",
+    "availability",
+    "chasm",
+    "free",
+    "legacy",
+    "net",
+    "network",
+    "open",
+    "port",
+    "unused",
+    "used"
+  ],
+  "bin": {},
+  "author": {
+    "name": "James Allen",
+    "email": "com.npmjs@meta.ceo",
+    "url": "https://github.com/metaceo"
+  },
+  "contributors": [],
+  "license": "MIT",
+  "preferGlobal": false,
+  "dependencies": {},
+  "devDependencies": {},
+  "optionalDependencies": {},
+  "bugs": {
+    "url": "https://github.com/metaceo/nodejs.chasm/issues"
+  },
+  "homepage": "https://github.com/metaceo/nodejs.chasm#readme"
+}
