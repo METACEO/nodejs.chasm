@@ -2,6 +2,9 @@
 
 *Module to asynchronously determine port availability.*
 
+[![Build Status](https://travis-ci.org/METACEO/nodejs.chasm.svg)](https://travis-ci.org/METACEO/nodejs.chasm)
+[![Dependency Status](https://david-dm.org/metaceo/nodejs.chasm.svg)](https://david-dm.org/metaceo/nodejs.chasm)
+
 ```
 npm install chasm
 ```
