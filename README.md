@@ -1,6 +1,6 @@
-# chasm
+# chasm `\ˈka-zəm\`
 
-*Module to asynchronously determine port availability.*
+*Module to asynchronously determine UNIX socket and port availabilities.*
 
 [![Build Status](https://travis-ci.org/METACEO/nodejs.chasm.svg)](https://travis-ci.org/METACEO/nodejs.chasm)
 [![Dependency Status](https://david-dm.org/metaceo/nodejs.chasm.svg)](https://david-dm.org/metaceo/nodejs.chasm)
@@ -17,53 +17,78 @@ npm install chasm
 * **Port Array** - provide an array of numerical values to have Chasm return each of the availabilities in the order provided.
 * **Port Range** - provide a minimum or maximum, or both, to have Chasm return the available port(s) within the specified range. You can additionally specify if you'd want the `last` port in the range or `all` the ports (without specification, Chasm will assume the `first`.) Specifying `last` will return the largest available port within the range. Specifying `all` will return all the ports with the range and their availabilities. While all port lookups are non-blocking, large ranges with `all` resulting ports will take additional time.
 * **Allow Reserved** - will set the floor of the port range from `1025` to `1`, expect the unexpected.
+* **UNIX Socket** - provide a file system path and Chasm will determine if it is available to listen on. `true` will mean the file descriptor does not exist *or* that it does but it's not responsive (see also **passive** and **wait** below.) `false` will mean the file descriptor exists and that it's responsive to the Chasm probe.
+* **Passive** - will tell Chasm not to delete non-responsive file descriptors when probing for UNIX sockets.
+* **Wait** - will tell Chasm how long to wait (in milliseconds) for a UNIX socket file descriptor to respond to its probe. If the time expires without a response from the file descriptor, then Chasm will report it as non-responsive. The default amount of time is two seconds (2,000 milliseconds.)
 
 While asynchronous, depending on the amount of `ports` to process, some statements may take longer to finish than others (even if they were called a way ahead of time.)
 
 ### Programmatically
 
-```javascript
-var Chasm = require('chasm')
+Chasm will `callback` with two variables, the first will be an error (usually defined if anything messed up with Node.js' `net` or `fs` module) and the second will be the result(s).
 
-Chasm(ports,function(err,result){
-    
-    if(err) console.error('Uh-oh!',err)
-    else console.log('Done!',result)
-  }
-);
-```
-
-Call Chasm with `ports` and a `callback`. Valid `ports` arguments are just below. The `callback` will include two variables, the first will be an error (defined if anything messed up with Node.js' `net` module) and the second will be the results.
-
-```javascript
-var Chasm = require('chasm')
-
-/* We'll simulate a used port. After this,
-// port '10100' will be in use and Chasm
-// will report its availability as 'false'.
-*/
-require('net').createServer().listen(10100);
-
-Chasm('smallest',console.log); // null 1025
-Chasm('largest',console.log); // null 65535
-
-Chasm(10100,console.log); // null false
-Chasm(10101,console.log); // null 10101
-
-Chasm([10099,10100,10001],console.log); // null [10099,false,10001]
-
-Chasm({'min':10100,'max':10102},console.log); // null 10101
-Chasm({'get':'first','min':10100,'max':10102},console.log); // null 10101
-Chasm({'get':'last','min':10100,'max':10102},console.log);  // null 10102
-Chasm({'get':'all','min':10100,'max':10102},console.log);   // null [false,10101,10102]
-```
+**General Example**
 
 ```javascript
 var Chasm = require('chasm');
 
-Chasm('smallest',console.log); // null 1025
-Chasm.allowReserved();
-Chasm('smallest',console.log); // null 1
+/* We'll simulate a used port and a UNIX socket file
+// descriptor. After this, both the port '10100' and
+// the UNIX socket '/tmp/my.service.socket' will be in
+// use and Chasm will report both their availabilities
+// as 'false'.
+*/
+require('net').createServer().listen(10100);
+require('net').createServer((s) => s.write('Hi!')).listen('/tmp/my.service.socket');
+
+Chasm.smallest(console.log); // null 1025
+Chasm.largest(console.log);  // null 65535
+
+Chasm.port(10100,console.log); // null false
+Chasm.port(10101,console.log); // null 10101
+
+Chasm.ports([10099,10100,10001],console.log); // null [10099,false,10001]
+
+Chasm.first({'min':10100,'max':10102},console.log); // null 10101
+Chasm.last({'min':10098,'max':10100},console.log);  // null 10099
+Chasm.all({'min':10099,'max':10101},console.log);   // null [10099,false,10101]
+
+Chasm.socket('/tmp/my.service.socket',console.log);     // null false
+Chasm.socket('/tmp/my.new.service.socket',console.log); // null true
+```
+
+**Non-responsive File Descriptor**
+
+```javascript
+var Chasm = require('chasm');
+
+/* We'll simulate a non-responsive file
+// descriptor (something possibly left over
+// from a previous process that possibly failed
+// to clean up after itself.) When Chasm is set
+// to passive, the file descriptor will still
+// report as available, but Chasm will not
+// delete it.
+*/
+require('fs').writeFileSync('./nonresponsive.file.descriptor','');
+
+Chasm.passive(); // true
+Chasm.socket('./nonresponsive.file.descriptor',console.log); // null true
+```
+
+**Reserved Ports**
+
+```javascript
+var Chasm = require('chasm');
+
+/* When Chasm is allowed into the reserved
+// ports, 'smallest' requests will begin
+// with those system ports... again, expect
+// the unexpected.
+*/
+Chasm.smallest(console.log); // null 1025
+Chasm.allowReserved(); // true
+Chasm.smallest(console.log); // null 1
 ```
 
 ## To-dos
