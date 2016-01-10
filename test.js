@@ -14,7 +14,7 @@ var _port = NET.createServer().listen(10100);
 */
 var _socket = NET.createServer()
 .on('connection',function TestSocketConnection(s){s.write(_socket._pipeName);})
-.listen('Chasm.delete.me.socket.' + process.hrtime().join(''));
+.listen('Chasm.delete.me.socket.' + (new Date).getTime().toString());
 
 /* This will create a non-responsive
 // file descriptor that we will test
@@ -72,7 +72,7 @@ function TestIterator(
       
       console.log('Good!.. ' + test.name + '.');
       
-      if(tests.length > 0) process.nextTick(TestIterator,tests.shift());
+      if(tests.length > 0) process.nextTick(TestNext);
       else{
         
         console.log('Cleaning up...');
@@ -106,5 +106,11 @@ function TestIterator(
   Chasm[test.func].apply(null,args);
 }
 
-TestIterator(tests.shift());
+function TestNext(
+){
+  
+  TestIterator(tests.shift());
+}
+
+TestNext();
 
