@@ -182,23 +182,61 @@ function ChasmSocket(
   }
   else{
     
-    FS.access(
+    FS.stat(
       path,
-      FS.R_OK | FS.W_OK,
-      function ChasmSocketAccess(
-        err
+      function ChasmSocketStat(
+        error,
+        stat
       ){
         
         var client;
         
-        /* A socket file descriptor was found,
-        // we will further test it to see if
-        // it's responsive.
-        */
         if(
-          (err === null)
-          ||
-          (err.code === 'EEXIST') // File exists
+          (error !== null)
+        ){
+          
+          /* A file descriptor of some sort is
+          // found, with error. Report back as
+          // not a valid place for a socket.
+          */
+          if(
+            (error.code === 'EACCES') // Permission denied
+            ||
+            (error.code === 'EISDIR') // Is a directory
+            ||
+            (error.code === 'EMFILE') // Too many open files in system
+            ||
+            (error.code === 'EPERM') // Operation not permitted
+          ){
+            
+            callback(null,false);
+          }
+          
+          /* No file descriptor or any sort
+          // was found!.. easy! Report back
+          // as a valid place for a socket.
+          */
+          else if(
+            (error.code === 'ENOENT') // No such file or directory
+          ){
+            
+            callback(null,true);
+          }
+          
+          /* Some other error was found,
+          // maybe related to the user's
+          // file system? Send them the
+          // error to work with.
+          */
+          else callback(error);
+        }
+        
+        /* A file descriptor was found, we
+        // will further test it to see if
+        // it's a responsive socket.
+        */
+        else if(
+          (stat.isSocket() === true)
         ){
           
           CreateClient(
@@ -243,40 +281,11 @@ function ChasmSocket(
           );
         }
         
-        /* A file descriptor of some sort is
-        // found, with error. Report back as
-        // not a valid place for a socket.
+        /* A file descriptor was found,
+        // but it is not identified as
+        // a UNIX socket.
         */
-        else if(
-          (err.code === 'EACCES') // Permission denied
-          ||
-          (err.code === 'EISDIR') // Is a directory
-          ||
-          (err.code === 'EMFILE') // Too many open files in system
-          ||
-          (err.code === 'EPERM') // Operation not permitted
-        ){
-          
-          callback(null,false);
-        }
-        
-        /* No file descriptor or any sort
-        // was found!.. easy! Report back
-        // as a valid place for a socket.
-        */
-        else if(
-          (err.code === 'ENOENT') // No such file or directory
-        ){
-          
-          callback(null,true);
-        }
-        
-        /* Some other error was found,
-        // maybe related to the user's
-        // file system? Send them the
-        // error to work with.
-        */
-        else callback(error);
+        else callback(null,false);
       }
     );
   }

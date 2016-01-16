@@ -20,8 +20,8 @@ var _socket = NET.createServer()
 // file descriptor that we will test
 // against.
 */
-var UnresponsiveSocket = 'Chasm.delete.me.socket.unresponsive';
-FS.writeFileSync(UnresponsiveSocket,'');
+var SomeOtherDescriptor = 'Chasm.delete.me.file.descriptor';
+FS.writeFileSync(SomeOtherDescriptor,'');
 
 /* Define the tests that we will be
 // iterating through.
@@ -37,7 +37,7 @@ var tests = [
   {'func':'all','data':{'min':10099,'max':10101},'name':'all','answers':'[10099,false,10101]'},
   {'func':'socket','data':_socket._pipeName,'name':'descriptor with a socket','answers':'false'},
   {'func':'socket','data':_socket._pipeName + 'x','name':'no descriptor with no socket','answers':'true'},
-  {'func':'socket','data':UnresponsiveSocket,'name':'descriptor with no socket','answers':'true'},
+  {'func':'socket','data':SomeOtherDescriptor,'name':'descriptor with no socket','answers':'false'},
 ];
 
 function TestIterator(
@@ -80,9 +80,9 @@ function TestIterator(
         _port.close();
         _socket.close();
         
-        FS.access(
-          UnresponsiveSocket,
-          function TestCleanUpSocket(
+        FS.unlink(
+          SomeOtherDescriptor,
+          function TestCleanUpDescriptor(
             error
           ){
             
@@ -94,9 +94,9 @@ function TestIterator(
               (error.code === 'ENOENT')
             ){
               
-              console.log('Ok!.. done!');
+              throw new Error(error);
             }
-            else throw new Error(error);
+            else console.log('Ok!.. done!');
           }
         );
       }

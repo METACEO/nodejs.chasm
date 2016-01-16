@@ -30,7 +30,9 @@ Chasm will `callback` with two variables, the first will be an error (usually de
 **General Example**
 
 ```javascript
-var Chasm = require('chasm');
+var Chasm   = require('chasm');
+var server1 = require('net').createServer();
+var server2 = require('net').createServer();
 
 /* We'll simulate a used port and a UNIX socket file
 // descriptor. After this, both the port '10100' and
@@ -38,8 +40,7 @@ var Chasm = require('chasm');
 // use and Chasm will report both their availabilities
 // as 'false'.
 */
-require('net').createServer().listen(10100);
-require('net').createServer((s) => s.write('Hi!')).listen('/tmp/my.service.socket');
+server1.listen(10100);
 
 Chasm.smallest(console.log); // null 1025
 Chasm.largest(console.log);  // null 65535
@@ -53,6 +54,13 @@ Chasm.first({'min':10100,'max':10102},console.log); // null 10101
 Chasm.last({'min':10098,'max':10100},console.log);  // null 10099
 Chasm.all({'min':10099,'max':10101},console.log);   // null [10099,false,10101]
 
+server2.on('connection',function(s){
+  
+  s.write('Hi!');
+});
+
+server2.listen('/tmp/my.service.socket');
+
 Chasm.socket('/tmp/my.service.socket',console.log);     // null false
 Chasm.socket('/tmp/my.new.service.socket',console.log); // null true
 ```
@@ -60,7 +68,8 @@ Chasm.socket('/tmp/my.new.service.socket',console.log); // null true
 **Non-responsive File Descriptor**
 
 ```javascript
-var Chasm = require('chasm');
+var Chasm  = require('./');
+var server = require('net').createServer();
 
 /* We'll simulate a non-responsive file
 // descriptor (something possibly left over
@@ -70,10 +79,22 @@ var Chasm = require('chasm');
 // report as available, but Chasm will not
 // delete it.
 */
-require('fs').writeFileSync('./nonresponsive.file.descriptor','');
-
 Chasm.passive(); // true
-Chasm.socket('./nonresponsive.file.descriptor',console.log); // null true
+
+server.listen('./nonresponsive.file.descriptor',function(){
+  
+  server.close();
+});
+
+server.on('connection',function(s){
+  
+  s.write('Hi!');
+});
+
+server.on('close',function(){
+  
+  Chasm.socket('./nonresponsive.file.descriptor',console.log); // null true
+});
 ```
 
 **Reserved Ports**
