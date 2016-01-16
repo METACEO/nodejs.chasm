@@ -75,20 +75,7 @@ function ChasmLargest(
   
   if(typeof callback !== 'function') return false;
   
-  CreateServer(MAX,function ChasmLargestCreate(
-    error,
-    isOpen,
-    port
-  ){
-    
-    if(error) callback(error);
-    else if(isOpen === true) callback(null,port);
-    else if(port < MIN) callback(null,false);
-    else{
-      
-      process.nextTick(CreateServer,(port-1),ChasmLargestCreate);
-    }
-  });
+  ChasmLast({'min':MIN,'max':MAX},callback);
 }
 
 function ChasmLast(
@@ -176,20 +163,7 @@ function ChasmSmallest(
   
   if(typeof callback !== 'function') return false;
   
-  CreateServer(MIN,function ChasmSmallestCreate(
-    error,
-    isOpen,
-    port
-  ){
-    
-    if(error) callback(error);
-    else if(isOpen === true) callback(null,port);
-    else if(port > MAX) callback(null,false);
-    else{
-      
-      process.nextTick(CreateServer,(port+1),ChasmSmallestCreate);
-    }
-  });
+  ChasmFirst({'min':MIN,'max':MAX},callback);
 }
 
 function ChasmSocket(
