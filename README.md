@@ -16,6 +16,7 @@ npm install chasm
 * **Largest** - will return the largest available port.
 * **Port Array** - provide an array of numerical values to have Chasm return each of the availabilities in the order provided.
 * **Port Range** - provide a minimum or maximum, or both, to have Chasm return the available port(s) within the specified range. You can additionally specify if you'd want the `last` port in the range or `all` the ports (without specification, Chasm will assume the `first`.) Specifying `last` will return the largest available port within the range. Specifying `all` will return all the ports with the range and their availabilities. While all port lookups are non-blocking, large ranges with `all` resulting ports will take additional time.
+* **Random** - will return the first randomly available port.
 * **Allow Reserved** - will set the floor of the port range from `1025` to `1`, expect the unexpected.
 * **UNIX Socket** - provide a file system path and Chasm will determine if it is available to listen on. `true` will mean the file descriptor does not exist *or* that it does but it's not responsive (see also **passive** and **wait** below.) `false` will mean the file descriptor exists and that it's responsive to the Chasm probe.
 * **Passive** - will tell Chasm not to delete non-responsive file descriptors when probing for UNIX sockets.
@@ -51,6 +52,8 @@ Chasm.port(10100,console.log); // null false
 Chasm.port(10101,console.log); // null 10101
 
 Chasm.ports([10099,10100,10001],console.log); // null [10099,false,10001]
+
+Chasm.random(console.log); // null 21539
 
 Chasm.first({'min':10100,'max':10102},console.log); // null 10101
 Chasm.last({'min':10098,'max':10100},console.log);  // null 10099
@@ -103,5 +106,4 @@ Chasm.smallest(console.log); // null 1
 
 * Have a reservation system that will hold a provided port and release it on command?.. provide the user the ability to reserve a port and switch it when the application is ready.
 * Have a service identifier, similar to [Wireshark](https://www.wireshark.org/)?.. without creating any new standards, it'd be useful to determine what service is behind the port (assuming it wants to be identified.)
-* Have a random port feature that will return the first randomly available port.
 

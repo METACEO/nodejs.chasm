@@ -157,6 +157,28 @@ function ChasmPorts(
   }
 }
 
+function ChasmRandom(
+  callback
+){
+  
+  if(typeof callback !== 'function') return false;
+  
+  CreateServer(Math.floor((Math.random() * MAX) + MIN),function ChasmRandomCreate(
+    error,
+    isOpen,
+    port
+  ){
+    
+    if(error) callback(error);
+    else if(isOpen === true) callback(null,port);
+    else if(isOpen === false) process.nextTick(function ChasmRandomAgain(){
+      
+      ChasmRandom(callback);
+    });
+    else callback(null,false);
+  });
+}
+
 function ChasmSmallest(
   callback
 ){
@@ -323,6 +345,7 @@ module.exports = {
   'passive':ChasmSocketPassive,
   'port':ChasmPort,
   'ports':ChasmPorts,
+  'random':ChasmRandom,
   'smallest':ChasmSmallest,
   'socket':ChasmSocket,
   'wait':ChasmSocketWait
