@@ -41,6 +41,8 @@ var server2 = require('net').createServer();
 // as 'false'.
 */
 server1.listen(10100);
+server2.listen('/tmp/my.service.socket');
+server2.on('connection',(s) => s.write('Hi!'));
 
 Chasm.smallest(console.log); // null 1025
 Chasm.largest(console.log);  // null 65535
@@ -53,13 +55,6 @@ Chasm.ports([10099,10100,10001],console.log); // null [10099,false,10001]
 Chasm.first({'min':10100,'max':10102},console.log); // null 10101
 Chasm.last({'min':10098,'max':10100},console.log);  // null 10099
 Chasm.all({'min':10099,'max':10101},console.log);   // null [10099,false,10101]
-
-server2.on('connection',function(s){
-  
-  s.write('Hi!');
-});
-
-server2.listen('/tmp/my.service.socket');
 
 Chasm.socket('/tmp/my.service.socket',console.log);     // null false
 Chasm.socket('/tmp/my.new.service.socket',console.log); // null true
@@ -81,17 +76,9 @@ var server = require('net').createServer();
 */
 Chasm.passive(); // true
 
-server.listen('./nonresponsive.file.descriptor',function(){
-  
-  server.close();
-});
-
-server.on('connection',function(s){
-  
-  s.write('Hi!');
-});
-
-server.on('close',function(){
+server.listen('./nonresponsive.file.descriptor',server.close);
+server.on('connection',(s) => s.write('Hi!'));
+server.on('close',() => {
   
   Chasm.socket('./nonresponsive.file.descriptor',console.log); // null true
 });
@@ -116,4 +103,5 @@ Chasm.smallest(console.log); // null 1
 
 * Have a reservation system that will hold a provided port and release it on command?.. provide the user the ability to reserve a port and switch it when the application is ready.
 * Have a service identifier, similar to [Wireshark](https://www.wireshark.org/)?.. without creating any new standards, it'd be useful to determine what service is behind the port (assuming it wants to be identified.)
+* Have a random port feature that will return the first randomly available port.
 
