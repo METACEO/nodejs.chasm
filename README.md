@@ -11,7 +11,7 @@ npm install chasm
 
 ## Usage
 
-* **Single Port** - provide a single numerical value to have Chasm return the its availability.
+* **Single Port** - provide a single numerical value to have Chasm return the port's availability.
 * **Smallest** - will return the smallest available port.
 * **Largest** - will return the largest available port.
 * **Port Array** - provide an array of numerical values to have Chasm return each of the availabilities in the order provided.
