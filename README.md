@@ -66,7 +66,7 @@ Chasm.socket('/tmp/my.new.service.socket',console.log); // null true
 **Non-responsive File Descriptor**
 
 ```javascript
-var Chasm  = require('./');
+var Chasm  = require('chasm');
 var server = require('net').createServer();
 
 /* We'll simulate a non-responsive file
